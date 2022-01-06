@@ -1,10 +1,13 @@
 from os import stat
-from fastapi import FastAPI,Response,status,HTTPException
+from fastapi import FastAPI,Response,status,HTTPException,Depends
 from fastapi.param_functions import Body
 from schema.schema import PostSchema
+from db.models import Post
+from db.db_connect import Base,engine,get_db
+from sqlalchemy.orm import Session
 
 #Testing
-from random import randrange
+# from random import randrange
 
 app  = FastAPI()
 
@@ -14,6 +17,14 @@ dummy_data = [
     {"title":"Django","content":"This is for large application","id":2},
 ]
 
+#_____________
+#
+#CREATING DB
+#______________
+Base.metadata.create_all(bind=engine)
+
+
+
 #----------initial
 @app.get('/')
 def root():
@@ -21,8 +32,10 @@ def root():
 
 #--Getting posts
 @app.get('/posts')
-def all_posts():
-    return {'status':'success','info':dummy_data}
+def all_posts(db:Session = Depends(get_db)):
+    posts = db.query(Post).all()
+    print(posts)
+    return {'status':'success','info':posts}
 
 #--creating posts without schema
 @app.post('/create/post')
@@ -32,20 +45,14 @@ def create_post(request: dict= Body(...)):
 
 #--creating post with schema
 @app.post('/create/post/s/',status_code=status.HTTP_201_CREATED)
-def create_postSchema(request:PostSchema):
-    #-fastest way
-    data = request.dict() 
-    data['id'] = randrange(0,10000000)
-    dummy_data.append(data)
-
-    ### -customized way
-    # data = {
-    #     'title':request.title,
-    #     'content': request.content,
-    #     'publish':request.publish,
-    #     'rating':request.rating
-    # }
-    return {'status':'success','info':dummy_data}
+def create_postSchema(request:PostSchema,db:Session=Depends(get_db)):
+    # data = request.dict() 
+    new_post = Post(**request.dict() ) #fastest
+    # new_post = Post(title= request.title,content=request.content,publish=request.publish)#morecode
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return {'status':'success','info':new_post}
 
 @app.get("/post/{id}")
 def blogSingle(id:int):
