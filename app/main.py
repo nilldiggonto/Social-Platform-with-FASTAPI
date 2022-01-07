@@ -54,9 +54,42 @@ def create_postSchema(request:PostSchema,db:Session=Depends(get_db)):
     db.refresh(new_post)
     return {'status':'success','info':new_post}
 
+
+#Fetching single post
 @app.get("/post/{id}")
-def blogSingle(id:int):
+def blogSingle(id:int,db:Session=Depends(get_db)):
+    blog = db.query(Post).filter(Post.id==id).first()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
+    return {'status':'success','info':blog}
+#update post
+@app.put('/post/update/{id}')
+def updatePost(id:int,request:PostSchema,db:Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.id==id)
+    post_edit = post.first()
+    if not post_edit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
+    post.update(request.dict(),synchronize_session=False)
+    db.commit()
+    return {'status':'success','data':post.first()}
+
+#Delete Post
+@app.delete('/post/delete/{id}',status_code=status.HTTP_204_NO_CONTENT)
+def deletePost(id:int,db:Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.id==id)
+    print(post)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
+    post.delete(synchronize_session=False)
+    db.commit()
+    return {'status':'deleted'}
+
+
+#For refrence fetching single id
+"""@app.get("/post/{id}")
+def blogSingle(id:int,db:Session=Depends(get_db)):
 #def blogSingle(id:int,response:Response):
+    db.query(Post).filter(Post.id==id).first()
     data = {'id':id}
     #
     # response.status_code = 404
@@ -65,16 +98,5 @@ def blogSingle(id:int):
     # response.status_code = status.HTTP_200_OK
     #---no need to pass responseResponse
     # raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,detail=data)
-    return {'status':'success','info':data}
+    return {'status':'success','info':data}"""
 
-@app.put('/post/update/{id}')
-def updatePost(id:int,request:PostSchema):
-    print(id)
-    return request.dict()
-
-
-
-#Delete Post
-@app.delete('post/delete/{id}',status_code=status.HTTP_204_NO_CONTENT)
-def deletePost(id:int):
-    return {'status':'deleted'}

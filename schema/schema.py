@@ -6,3 +6,5 @@ class PostSchema(BaseModel):
     content :   str
     publish :   bool    =   True
     # rating  :   Optional[int]   =   None
+
+
