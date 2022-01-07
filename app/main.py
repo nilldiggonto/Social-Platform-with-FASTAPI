@@ -1,7 +1,7 @@
 from os import stat
 from fastapi import FastAPI,Response,status,HTTPException,Depends
 from fastapi.param_functions import Body
-from schema.schema import PostSchema
+from schema.schema import CreatePostSchema, PostSchema
 from db.models import Post
 from db.db_connect import Base,engine,get_db
 from sqlalchemy.orm import Session
@@ -45,7 +45,7 @@ def create_post(request: dict= Body(...)):
 
 #--creating post with schema
 @app.post('/create/post/s/',status_code=status.HTTP_201_CREATED)
-def create_postSchema(request:PostSchema,db:Session=Depends(get_db)):
+def create_postSchema(request:CreatePostSchema,db:Session=Depends(get_db)):
     # data = request.dict() 
     new_post = Post(**request.dict() ) #fastest
     # new_post = Post(title= request.title,content=request.content,publish=request.publish)#morecode
@@ -64,7 +64,7 @@ def blogSingle(id:int,db:Session=Depends(get_db)):
     return {'status':'success','info':blog}
 #update post
 @app.put('/post/update/{id}')
-def updatePost(id:int,request:PostSchema,db:Session = Depends(get_db)):
+def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db)):
     post = db.query(Post).filter(Post.id==id)
     post_edit = post.first()
     if not post_edit:
