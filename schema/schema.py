@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
+from datetime import datetime
 
 # from db.db_connect import Base
 #
@@ -15,6 +16,7 @@ class PostSchema(BaseModel):
     title   :   str
     content :   str
     publish :   bool    =   True
+    
     # rating  :   Optional[int]   =   None
 
 
@@ -27,3 +29,9 @@ class CreatePostSchema(PostBaseSchema):
 # class UpdatePostSchema(PostBaseSchema):
 #     pass
 
+
+#-------------RESPONSE SCHEMA
+class PostResponseSchema(PostBaseSchema):
+    created_at  :   datetime
+    class Config:
+        orm_mode = True

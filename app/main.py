@@ -1,7 +1,9 @@
 from os import stat
+from typing import List
 from fastapi import FastAPI,Response,status,HTTPException,Depends
 from fastapi.param_functions import Body
-from schema.schema import CreatePostSchema, PostSchema
+from starlette.responses import JSONResponse
+from schema.schema import CreatePostSchema, PostResponseSchema, PostSchema
 from db.models import Post
 from db.db_connect import Base,engine,get_db
 from sqlalchemy.orm import Session
@@ -31,11 +33,11 @@ def root():
     return {'info':'yo fastapi'}
 
 #--Getting posts
-@app.get('/posts')
+@app.get('/posts',response_model= List[PostResponseSchema] )
 def all_posts(db:Session = Depends(get_db)):
     posts = db.query(Post).all()
-    print(posts)
-    return {'status':'success','info':posts}
+    return posts
+    # return posts
 
 #--creating posts without schema
 @app.post('/create/post')
@@ -52,16 +54,16 @@ def create_postSchema(request:CreatePostSchema,db:Session=Depends(get_db)):
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
-    return {'status':'success','info':new_post}
+    return {'status':'created','data':{'title':new_post.title,'content':new_post.content}}
 
 
 #Fetching single post
 @app.get("/post/{id}")
-def blogSingle(id:int,db:Session=Depends(get_db)):
-    blog = db.query(Post).filter(Post.id==id).first()
-    if not blog:
+def postSingle(id:int,db:Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id==id).first()
+    if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
-    return {'status':'success','info':blog}
+    return {'status':'success','post':{'title':post.title,'content':post.content}}
 #update post
 @app.put('/post/update/{id}')
 def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db)):
