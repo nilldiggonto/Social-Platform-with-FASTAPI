@@ -9,11 +9,7 @@ from schema.schema import CreatePostSchema, PostResponseSchema, PostSchema, User
 from db.models import Post, User
 from db.db_connect import Base,engine,get_db
 from sqlalchemy.orm import Session
-
-from passlib.context import CryptContext
-
-
-pwd_context = CryptContext(schemes=["bcrypt"],deprecated="auto")
+from utils.passwordUtils import hash
 #Testing
 # from random import randrange
 
@@ -101,7 +97,7 @@ def deletePost(id:int,db:Session = Depends(get_db)):
 
 @app.post('/user/create/',status_code=status.HTTP_201_CREATED)
 def userCreate(request:UserCreateSchema,db:Session = Depends(get_db)):
-    hashed_pass = pwd_context.hash(request.password)
+    hashed_pass = hash(request.password)
 
     request.password = hashed_pass
     user = User(**request.dict())
