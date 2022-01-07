@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from datetime import datetime
 
 # from db.db_connect import Base
@@ -35,3 +35,10 @@ class PostResponseSchema(PostBaseSchema):
     created_at  :   datetime
     class Config:
         orm_mode = True
+
+
+    #---------------
+#--------User
+class UserCreateSchema(BaseModel):
+    email       :   EmailStr
+    password    :   str

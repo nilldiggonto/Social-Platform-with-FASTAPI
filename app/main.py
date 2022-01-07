@@ -1,13 +1,19 @@
+from enum import auto
 from os import stat
 from typing import List
 from fastapi import FastAPI,Response,status,HTTPException,Depends
 from fastapi.param_functions import Body
+from sqlalchemy.util.deprecations import deprecated
 from starlette.responses import JSONResponse
-from schema.schema import CreatePostSchema, PostResponseSchema, PostSchema
-from db.models import Post
+from schema.schema import CreatePostSchema, PostResponseSchema, PostSchema, UserCreateSchema
+from db.models import Post, User
 from db.db_connect import Base,engine,get_db
 from sqlalchemy.orm import Session
 
+from passlib.context import CryptContext
+
+
+pwd_context = CryptContext(schemes=["bcrypt"],deprecated="auto")
 #Testing
 # from random import randrange
 
@@ -85,6 +91,24 @@ def deletePost(id:int,db:Session = Depends(get_db)):
     post.delete(synchronize_session=False)
     db.commit()
     return {'status':'deleted'}
+
+
+#______________________
+#
+#USER SECTION
+#
+#______________________
+
+@app.post('/user/create/',status_code=status.HTTP_201_CREATED)
+def userCreate(request:UserCreateSchema,db:Session = Depends(get_db)):
+    hashed_pass = pwd_context.hash(request.password)
+
+    request.password = hashed_pass
+    user = User(**request.dict())
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {'status':'created','info':{"email":user.email,'password':user.password,'created':user.created_at}}
 
 
 #For refrence fetching single id
