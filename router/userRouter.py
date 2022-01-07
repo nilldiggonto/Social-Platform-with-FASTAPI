@@ -5,8 +5,12 @@ from sqlalchemy.orm import Session
 from db.models import User
 from utils.passwordUtils import hash
 
-router = APIRouter()
-@router.post('/user/create/',status_code=status.HTTP_201_CREATED)
+router = APIRouter(
+    prefix="/user",
+    tags = ["users"]
+)
+
+@router.post('/create/',status_code=status.HTTP_201_CREATED)
 def userCreate(request:UserCreateSchema,db:Session = Depends(get_db)):
     hashed_pass = hash(request.password)
     request.password = hashed_pass
@@ -16,7 +20,7 @@ def userCreate(request:UserCreateSchema,db:Session = Depends(get_db)):
     db.refresh(user)
     return {'status':'created','info':{"email":user.email,'password':user.password,'created':user.created_at}}
 
-@router.get('/user/info/{id}/',status_code=status.HTTP_200_OK)
+@router.get('/info/{id}/',status_code=status.HTTP_200_OK)
 def userInfo(id:int,db:Session = Depends(get_db)):
     user = db.query(User).filter(User.id==id).first()
     if not user:

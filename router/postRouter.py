@@ -6,7 +6,9 @@ from db.models import Post
 from typing import List
 from fastapi.param_functions import Body
 
-router = APIRouter()
+router = APIRouter(
+    tags=["posts"]
+)
 
 
 @router.get('/posts',response_model= List[PostResponseSchema] )

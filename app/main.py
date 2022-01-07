@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI
 from db.db_connect import Base,engine
-from router import postRouter,userRouter
+from router import postRouter,userRouter,auth
 
 app  = FastAPI()
 #_____________
@@ -18,5 +18,8 @@ app.include_router(postRouter.router)
 
 #---user-routes
 app.include_router(userRouter.router)
+
+#----Authenticate
+app.include_router(auth.router)
 
 

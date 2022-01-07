@@ -42,3 +42,8 @@ class PostResponseSchema(PostBaseSchema):
 class UserCreateSchema(BaseModel):
     email       :   EmailStr
     password    :   str
+
+#-----login
+class UserLoginSchema(BaseModel):
+    email       :   EmailStr
+    password    :   str
