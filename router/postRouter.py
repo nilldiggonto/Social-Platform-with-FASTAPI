@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from db.models import Post
 from typing import List
 from fastapi.param_functions import Body
-
+from utils import oauth2
 router = APIRouter(
     tags=["posts"]
 )
@@ -19,32 +19,33 @@ def all_posts(db:Session = Depends(get_db)):
 
 #--creating posts without schema
 @router.post('/create/post')
-def create_post(request: dict= Body(...)):
+def create_post(request: dict= Body(...),current_user:int = Depends(oauth2.get_user)):
     title = request['title']
     return {'status':'success','info':{'title':title}}
 
 #--creating post with schema
 @router.post('/create/post/s/',status_code=status.HTTP_201_CREATED)
-def create_postSchema(request:CreatePostSchema,db:Session=Depends(get_db)):
+def create_postSchema(request:CreatePostSchema,db:Session=Depends(get_db),current_user:int = Depends(oauth2.get_user)):
+    # print(current_user)
     # data = request.dict() 
     new_post = Post(**request.dict() ) #fastest
     # new_post = Post(title= request.title,content=request.content,publish=request.publish)#morecode
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
-    return {'status':'created','data':{'title':new_post.title,'content':new_post.content}}
+    return {'status':'created','current_user':current_user.email,'data':{'title':new_post.title,'content':new_post.content}}
 
 
 #Fetching single post
 @router.get("/post/{id}")
-def postSingle(id:int,db:Session=Depends(get_db)):
+def postSingle(id:int,db:Session=Depends(get_db),current_user:int = Depends(oauth2.get_user)):
     post = db.query(Post).filter(Post.id==id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
     return {'status':'success','post':{'title':post.title,'content':post.content}}
 #update post
 @router.put('/post/update/{id}')
-def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db)):
+def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db),current_user:int = Depends(oauth2.get_user)):
     post = db.query(Post).filter(Post.id==id)
     post_edit = post.first()
     if not post_edit:
@@ -55,7 +56,7 @@ def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db)):
 
 #Delete Post
 @router.delete('/post/delete/{id}',status_code=status.HTTP_204_NO_CONTENT)
-def deletePost(id:int,db:Session = Depends(get_db)):
+def deletePost(id:int,db:Session = Depends(get_db),current_user:int = Depends(oauth2.get_user)):
     post = db.query(Post).filter(Post.id==id)
     print(post)
     if not post:
