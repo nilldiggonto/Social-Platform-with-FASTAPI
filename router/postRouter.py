@@ -3,7 +3,7 @@ from schema.schema import PostResponseSchema,CreatePostSchema
 from db.db_connect import get_db
 from sqlalchemy.orm import Session
 from db.models import Post
-from typing import List
+from typing import List, Optional
 from fastapi.param_functions import Body
 from utils import oauth2
 router = APIRouter(
@@ -11,10 +11,12 @@ router = APIRouter(
 )
 
 
-@router.get('/posts',response_model= List[PostResponseSchema] )
-def all_posts(db:Session = Depends(get_db)):
-    posts = db.query(Post).all()
-    return posts
+@router.get('/posts')
+def all_posts(db:Session = Depends(get_db),limit:int=10,skip:int=0,search:Optional[str]=""):
+    # posts = db.query(Post).all()
+    posts = db.query(Post).filter(Post.title.contains(search)).limit(limit).offset(skip).all()
+    data = [{'id':post.id,'user':post.owner.email,'title':post.title,'content':post.content,'publish':post.publish,'created':post.created_at.strftime('%Y-%m-%d %H:%M:%S')} for post in posts]
+    return {'status':'success','items':len(posts),'data':data}
     # return posts
 
 #--creating posts without schema
@@ -28,8 +30,8 @@ def create_post(request: dict= Body(...),current_user:int = Depends(oauth2.get_u
 def create_postSchema(request:CreatePostSchema,db:Session=Depends(get_db),current_user:int = Depends(oauth2.get_user)):
     # print(current_user)
     # data = request.dict() 
-    new_post = Post(**request.dict() ) #fastest
-    # new_post = Post(title= request.title,content=request.content,publish=request.publish)#morecode
+    new_post = Post(owner_id=current_user.id,**request.dict() ) #fastest
+    # new_post = Post(owner_id=current_user.id,title= request.title,content=request.content,publish=request.publish)#morecode
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -50,6 +52,8 @@ def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db),curr
     post_edit = post.first()
     if not post_edit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
+    if  current_user.id != post_edit.owner_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail='Not Allowed')
     post.update(request.dict(),synchronize_session=False)
     db.commit()
     return {'status':'success','data':post.first()}
@@ -58,9 +62,11 @@ def updatePost(id:int,request:CreatePostSchema,db:Session = Depends(get_db),curr
 @router.delete('/post/delete/{id}',status_code=status.HTTP_204_NO_CONTENT)
 def deletePost(id:int,db:Session = Depends(get_db),current_user:int = Depends(oauth2.get_user)):
     post = db.query(Post).filter(Post.id==id)
-    print(post)
+    get_post = post.first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='no such query found')
+    if  current_user.id != get_post.owner_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail='Not Allowed')
     post.delete(synchronize_session=False)
     db.commit()
     return {'status':'deleted'}

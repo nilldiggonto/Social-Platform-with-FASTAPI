@@ -29,7 +29,6 @@ class CreatePostSchema(PostBaseSchema):
 # class UpdatePostSchema(PostBaseSchema):
 #     pass
 
-
 #-------------RESPONSE SCHEMA
 class PostResponseSchema(PostBaseSchema):
     created_at  :   datetime

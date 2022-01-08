@@ -1,7 +1,8 @@
-
 from fastapi import FastAPI
 from db.db_connect import Base,engine
 from router import postRouter,userRouter,auth
+from utils.oauth2 import SECRET_KEY
+from config.config import settings
 
 app  = FastAPI()
 #_____________

@@ -7,14 +7,16 @@ from fastapi import Depends,status,HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from db.db_connect import get_db
 from db.models import User
+from config.config import settings
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 #SECRET KEY FOR CHECK
 # python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 
-SECRET_KEY = "i@+ms60tfhs^xfdal_vyp40l^xb8&z)r+cbfwgzr!s_3g3d3bf"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES =settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def create_access_token(data:dict):
     to_encode = data.copy()
