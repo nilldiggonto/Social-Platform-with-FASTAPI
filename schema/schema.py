@@ -2,6 +2,8 @@ from typing import Optional
 from pydantic import BaseModel,EmailStr
 from datetime import datetime
 
+from pydantic.types import conint
+
 # from db.db_connect import Base
 #
 
@@ -54,3 +56,9 @@ class TokenSchema(BaseModel):
 
 class TokenDataSchema(BaseModel):
     id  :   Optional[str]   =   None
+
+
+#--Rating Schema
+class RateSchema(BaseModel):
+    post_id     :   int
+    rate        :   bool

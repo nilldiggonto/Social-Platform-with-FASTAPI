@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from db.db_connect import Base,engine
-from router import postRouter,userRouter,auth
+from router import postRouter,userRouter,auth, voteRouter
 from utils.oauth2 import SECRET_KEY
 from config.config import settings
 
@@ -22,5 +22,8 @@ app.include_router(userRouter.router)
 
 #----Authenticate
 app.include_router(auth.router)
+
+#---Rating
+app.include_router(voteRouter.router)
 
 
