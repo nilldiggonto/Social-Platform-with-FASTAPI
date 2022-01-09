@@ -1,0 +1,26 @@
+# Generic single-database configuration.
+
+# pip install alembic
+# alembic init alembic (generate a folder name alembic)
+## Configure the env.py filte alembic generate
+
+"""
+from config.config import settings
+from db.models import Base
+
+config = context.config
+config.set_main_option("sqlalchemy.url",f"postgresql+psycopg2://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
+
+fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+"""
+
+#-------
+# alembic revision -m "Create whatever table"
+#- Modify the new revision filte
+# alembic current #to check current revision
+
+#-- alembic upgrade "revision_Id"
+#-- alembic downgrade "downgrade revision_id"
+ 

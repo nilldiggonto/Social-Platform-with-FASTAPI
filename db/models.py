@@ -14,7 +14,6 @@ class Post(Base):
     publish =   Column(Boolean,server_default="True",nullable=False)
     created_at  =  Column(TIMESTAMP(timezone=True),nullable=False,server_default=text('now()'))
     owner_id   =   Column(Integer,ForeignKey('users.id',ondelete="CASCADE"),nullable=False)
-
     owner   =   relationship("User") 
 
 #----------- USER MODEL
@@ -24,7 +23,6 @@ class User(Base):
     email       =   Column(String,nullable=False,unique=True)
     password    =   Column(String,nullable=False)
     created_at  =   Column(TIMESTAMP(timezone=True),nullable=False,server_default=text('now()'))
-
 
 #--- RATING SYSTEM
 class Rate(Base):
