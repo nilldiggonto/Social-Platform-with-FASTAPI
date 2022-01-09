@@ -23,4 +23,7 @@ target_metadata = Base.metadata
 
 #-- alembic upgrade "revision_Id"
 #-- alembic downgrade "downgrade revision_id"
+
+#-- TO AUTO GENERATE MODELS
+#-- alembic --revision --autogenerate -m "autogenerate first"
  
