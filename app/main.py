@@ -9,7 +9,7 @@ app  = FastAPI()
 #
 #CREATING DB
 #______________
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine) #Using alembic to generate tables 
 #----------initial
 @app.get('/')
 def root():
